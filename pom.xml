@@ -162,6 +162,41 @@
     </build>
 
     <profiles>
+        <!-- Perfil sem WiX: gera pasta portátil com EXE dentro. Zipar e distribuir. -->
+        <profile>
+            <id>windows-app</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.panteleyev</groupId>
+                        <artifactId>jpackage-maven-plugin</artifactId>
+                        <version>1.7.4</version>
+                        <executions>
+                            <execution>
+                                <id>build-app-image</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jpackage</goal>
+                                </goals>
+                                <configuration>
+                                    <name>Vesta</name>
+                                    <appVersion>1.0.0</appVersion>
+                                    <vendor>MaViniciusDev</vendor>
+                                    <destination>${project.build.directory}/app</destination>
+                                    <input>${project.build.directory}</input>
+                                    <mainJar>${project.build.finalName}.jar</mainJar>
+                                    <type>APP_IMAGE</type>
+                                    <javaOptions>
+                                        <javaOption>--enable-native-access=ALL-UNNAMED</javaOption>
+                                    </javaOptions>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
         <profile>
             <id>windows-exe</id>
             <build>
