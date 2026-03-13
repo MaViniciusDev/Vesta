@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,6 +18,15 @@ public class ImageStorageService {
     // Ex: lefil.storage.path=C:/Vesta/imagens (no Windows) ou /tmp/vesta/imagens (no Fedora)
     @Value("${lefil.storage.path:imagens_produtos}")
     private String diretorioRaiz;
+
+    @Value("${vesta.image.max-width:1080}")
+    private int maxWidth;
+
+    @Value("${vesta.image.max-height:1080}")
+    private int maxHeight;
+
+    @Value("${vesta.image.quality:0.8}")
+    private double imageQuality;
 
     public String salvarEComprimirFoto(MultipartFile foto, String sku) {
         if (foto == null || foto.isEmpty()) {
@@ -36,14 +44,11 @@ public class ImageStorageService {
             String nomeArquivo = sku + "_" + UUID.randomUUID().toString().substring(0, 8) + ".jpg";
             Path caminhoCompleto = diretorioPath.resolve(nomeArquivo);
 
-            // A Mágica do Thumbnailator:
-            // 1. Pega a foto original (que pode ter 5MB e 4000x4000px)
-            // 2. Redimensiona para no máximo 1080x1080 (mantendo a proporção)
-            // 3. Aplica 80% de qualidade (Otimização invisível a olho nu)
-            // 4. Salva no HD local
+            // Reencoda sempre em JPG com resize/qualidade configuraveis para reduzir espaco em disco.
             Thumbnails.of(foto.getInputStream())
-                    .size(1080, 1080)
-                    .outputQuality(0.8)
+                    .size(maxWidth, maxHeight)
+                    .outputFormat("jpg")
+                    .outputQuality(imageQuality)
                     .toFile(caminhoCompleto.toFile());
 
             // Retorna o caminho relativo que será salvo no banco de dados
