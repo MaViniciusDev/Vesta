@@ -6,8 +6,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>4.0.3</version>
-        <relativePath/> <!-- lookup parent from repository -->
-    </parent>
+        <relativePath/> </parent>
     <groupId>com.MaViniciusDev</groupId>
     <artifactId>Vesta</artifactId>
     <version>0.0.1-SNAPSHOT</version>
@@ -208,12 +207,10 @@
     </build>
 
     <profiles>
-        <!-- Perfil sem WiX: gera pasta portátil com EXE dentro. Zipar e distribuir. -->
         <profile>
             <id>windows-app</id>
             <build>
                 <plugins>
-                    <!-- Copia apenas o JAR para um diretório limpo antes do jpackage -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-antrun-plugin</artifactId>
@@ -268,6 +265,26 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>prepare-jpackage-staging-exe</id>
+                                <phase>pre-integration-test</phase>
+                                <goals><goal>run</goal></goals>
+                                <configuration>
+                                    <target>
+                                        <mkdir dir="${project.build.directory}/jpackage-input"/>
+                                        <copy file="${project.build.directory}/${project.build.finalName}.jar"
+                                              todir="${project.build.directory}/jpackage-input"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
                         <groupId>org.panteleyev</groupId>
                         <artifactId>jpackage-maven-plugin</artifactId>
                         <version>1.7.4</version>
@@ -283,7 +300,7 @@
                                     <appVersion>${project.version}</appVersion>
                                     <vendor>MaViniciusDev</vendor>
                                     <destination>${project.build.directory}/installer</destination>
-                                    <input>${project.build.directory}</input>
+                                    <input>${project.build.directory}/jpackage-input</input>
                                     <mainJar>${project.build.finalName}.jar</mainJar>
                                     <type>EXE</type>
                                     <winConsole>true</winConsole>
@@ -303,7 +320,7 @@
                                     <appVersion>${project.version}</appVersion>
                                     <vendor>MaViniciusDev</vendor>
                                     <destination>${project.build.directory}/installer</destination>
-                                    <input>${project.build.directory}</input>
+                                    <input>${project.build.directory}/jpackage-input</input>
                                     <mainJar>${project.build.finalName}.jar</mainJar>
                                     <type>MSI</type>
                                     <winConsole>true</winConsole>
